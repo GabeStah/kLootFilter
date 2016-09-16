@@ -1,0 +1,10 @@
+## Interface: 70300
+## Title: kLootFilter |cffb5a5d5[1.0.0]|r
+## Author: Kulldam
+## Notes: Filter auto-looted items.
+## Version: 1.0.0
+## SavedVariables: kLootFilterDB
+## Dependencies: kMiscellaneous
+
+embeds.xml
+kLootFilter.lua
