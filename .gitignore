@@ -44,5 +44,3 @@ luac.out
 
 .gitignore
 .idea/
-kLootFilter.lua
-kLootFilter.toc
