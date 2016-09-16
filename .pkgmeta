@@ -1,0 +1,43 @@
+externals:
+    libs/CallbackHandler-1.0:
+        url: svn://svn.wowace.com/wow/callbackhandler/mainline/trunk/CallbackHandler-1.0
+        tag: latest
+    libs/LibSharedMedia-3.0:
+        url: svn://svn.wowace.com/wow/libsharedmedia-3-0/mainline/trunk/LibSharedMedia-3.0
+        tag: latest
+    libs/LibStub:
+        url: svn://svn.wowace.com/wow/libstub/mainline/trunk
+        tag: latest
+    libs/Ace3/AceAddon-3.0:
+        url: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceAddon-3.0
+        tag: latest
+    libs/Ace3/AceComm-3.0:
+        url: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceComm-3.0
+        tag: latest
+    libs/Ace3/AceConsole-3.0:
+        url: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceConsole-3.0
+        tag: latest
+    libs/Ace3/AceConfig-3.0:
+        url: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceConfig-3.0
+        tag: latest
+    libs/Ace3/AceDB-3.0:
+        url: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceDB-3.0
+        tag: latest
+    libs/Ace3/AceDBOptions-3.0:
+        url: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceDBOptions-3.0
+        tag: latest
+    libs/Ace3/AceEvent-3.0:
+        url: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceEvent-3.0
+        tag: latest
+    libs/Ace3/AceHook-3.0:
+        url: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceHook-3.0
+        tag: latest
+    libs/Ace3/AceSerializer-3.0:
+        url: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceSerializer-3.0
+        tag: latest
+    libs/Ace3/AceTimer-3.0:
+        url: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceTimer-3.0
+        tag: latest
+    libs/kLib:
+        url: git@git.curseforge.com:wow/klib/mainline.git
+        tag: latest
