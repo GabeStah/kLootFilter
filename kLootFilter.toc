@@ -1,7 +1,7 @@
 ## Interface: 70300
 ## Title: kLootFilter
 ## Author: Kulldam
-## Notes: Filter auto-looted items.
+## Notes: Filter out specific items when looting.
 ## Version: 1.0.0
 ## SavedVariables: kLootFilterDB
 ## Dependencies: kLib, kMiscellaneous
