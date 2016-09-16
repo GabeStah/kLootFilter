@@ -14,7 +14,6 @@ local kLootFilter = LibStub("AceAddon-3.0"):NewAddon("kLootFilter",
     "kLibView-1.0")
 _G.kLootFilter = kLootFilter
 
-local frame = CreateFrame("Frame")
 local epoch = 0 -- time of the last auto loot
 
 local LOOT_DELAY = 0.3 -- constant interval that prevents rapid looting
