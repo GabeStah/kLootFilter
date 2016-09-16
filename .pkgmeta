@@ -41,3 +41,5 @@ externals:
     libs/kLib:
         url: git://git.curseforge.com/wow/klib/mainline.git
         tag: latest
+
+package-as: kLootFilter
