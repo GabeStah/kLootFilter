@@ -47,3 +47,6 @@ luac.out
 
 # Libs
 libs/
+
+# Changelogs
+Changelog-*.txt
