@@ -2,7 +2,7 @@
 ## Title: kLootFilter
 ## Author: Kulldam
 ## Notes: Filter out specific items when looting.
-## Version: 1.0.1
+## Version: 1.0.2
 ## SavedVariables: kLootFilterDB
 ## Dependencies: kLib, kMiscellaneous
 
