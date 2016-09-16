@@ -39,5 +39,5 @@ externals:
         url: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceTimer-3.0
         tag: latest
     libs/kLib:
-        url: git@git.curseforge.com:wow/klib/mainline.git
+        url: git://git.curseforge.com/wow/klib/mainline.git
         tag: latest
