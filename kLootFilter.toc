@@ -7,3 +7,5 @@
 
 embeds.xml
 core.lua
+
+config-item-list.lua

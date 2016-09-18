@@ -4,7 +4,8 @@ local table, tinsert, tremove, wipe, sort, date, time, random = table, table.ins
 local math, tostring, string, strjoin, strlower, strsplit, strsub, strtrim, strupper, floor, tonumber = math, tostring, string, string.join, string.lower, string.split, string.sub, string.trim, string.upper, math.floor, tonumber
 local select, pairs, print, next, type, unpack = select, pairs, print, next, type, unpack
 local loadstring, assert, error = loadstring, assert, error
-local kLootFilter = LibStub("AceAddon-3.0"):NewAddon(ADDON_NAME,
+local addon = LibStub("AceAddon-3.0"):NewAddon(ADDON_NAME,
+    "AceConsole-3.0",
     "AceEvent-3.0",
     "kLib-1.0",
     "kLibColor-1.0",
@@ -14,29 +15,41 @@ local kLootFilter = LibStub("AceAddon-3.0"):NewAddon(ADDON_NAME,
     "kLibTimer-1.0",
     "kLibUtility-1.0",
     "kLibView-1.0")
-_G.kLootFilter = kLootFilter
-local self = kLootFilter
+local AceConfigDialog = LibStub('AceConfigDialog-3.0')
 
 local epoch = 0 -- time of the last auto loot
 
 local LOOT_DELAY = 0.3 -- constant interval that prevents rapid looting
 
-local FILTER_BLACKLIST = {
-    [133607] = true, -- Silver Mackerel
-    [133701] = true, -- Skrog Toenail (fishing bait, attracts Murloc)
-}
-
-self.defaults = {
+addon.defaults = {
 	profile = {
+        debug = {
+			enabled = false,
+			threshold = 1,
+		},
 		enabled = true,
         filtered = {},
-        selected_filtered_item = nil,
+        outputFiltering = true,
+        isWhitelist = false,
 	},
 	global = {},
 }
 
+--- Generate the options table.
 local function GetOptions(uiType, uiName)
-    local options = {
+    local handlerProto = setmetatable({
+        SetItem = function(self, opt, item, added)
+            if added then
+                addon:AddItemToFilter(item)
+            else
+                addon:RemoveItemFromFilter(item)
+            end
+            AceConfigDialog:SelectGroup(ADDON_NAME, "filtered")
+        end
+	}, { __index = {} })
+	local handlerMeta = { __index = handlerProto }
+
+    local optionProto = {
         type = "group",
         name = GetAddOnMetadata(ADDON_NAME, "Title"),
         args = {
@@ -45,77 +58,144 @@ local function GetOptions(uiType, uiName)
                 order = 0,
                 name = GetAddOnMetadata(ADDON_NAME, "Notes"),
             },
+            debug = {
+                name = 'Debug',
+                type = 'group',
+                order = 99,
+                args = {
+                    enabled = {
+                        name = 'Enabled',
+                        type = 'toggle',
+                        desc = 'Toggle Debug mode',
+                        set = function(info,value) addon.db.profile.debug.enabled = value end,
+                        get = function(info) return addon.db.profile.debug.enabled end,
+                    },
+                    threshold = {
+                        name = 'Threshold',
+                        desc = 'Description for Debug Threshold',
+                        type = 'select',
+                        values = {
+                            [1] = 'Low',
+                            [2] = 'Normal',
+                            [3] = 'High',
+                        },
+                        style = 'dropdown',
+                        set = function(info,value) addon.db.profile.debug.threshold = value end,
+                        get = function(info) return addon.db.profile.debug.threshold end,
+                    },
+                },
+                cmdHidden = true,
+            },
             enabled = {
                 name = "Enabled",
                 desc = ("Toggle if %s is enabled."):format(ADDON_NAME),
                 type = "toggle",
                 order = 1,
                 get = function()
-                    return self.db.profile.enabled
+                    return addon.db.profile.enabled
                 end,
                 set = function()
-                    self.db.profile.enabled = not self.db.profile.enabled
+                    addon.db.profile.enabled = not addon.db.profile.enabled
+                    if addon.db.profile.enabled then
+                        addon:Enable()
+                    else
+                        addon:Disable()
+                    end
                 end,
             },
             filtered = {
                 name = "Filtered Items",
                 type = "group",
+                order = 1,
                 args = {
                     desc = {
                         type = "description",
                         order = 0,
                         name = "List of items that are filtered (and thus ignored) when looting.",
                     },
-                    input = {
-                        type = "input",
-                        name = "Add an Item",
-                        desc = "Enter an item ID number if possible, otherwise an item name.",
-                        get = function() return end,
-                        set = function(self, val)
-                            kLootFilter:AddItemToFilter(val)
-                        end,
-                    },
-                    list = {
-                        type = "select",
-                        name = "Filtered Items",
-                        values = function()
-                            return self:GetFilteredList()
-                        end,
+                    isWhitelist = {
+                        name = "Filter as Whitelist",
+                        desc = "If enabled, will use the filtered item list as a whitelist, looting only the specified, filtered items.",
+                        type = "toggle",
+                        order = 1,
                         get = function()
-                            return self.db.profile.selected_filtered_item
+                            return addon.db.profile.isWhitelist
                         end,
-                        set = function(self, val)
-                            kLootFilter.db.profile.selected_filtered_item = val
-                        end
+                        set = function()
+                            addon.db.profile.isWhitelist = not addon.db.profile.isWhitelist
+                        end,
+                        width = 'normal',
+                    },
+                    outputFiltering = {
+                        name = "Output Filter Messages",
+                        desc = "If enabled, will output a message when an item is filtered.",
+                        type = "toggle",
+                        order = 5,
+                        get = function()
+                            return addon.db.profile.outputFiltering
+                        end,
+                        set = function()
+                            addon.db.profile.isWhitelist = not addon.db.profile.outputFiltering
+                        end,
+                        width = 'normal',
+                    },
+                    items = {
+                        name = 'Items',
+                        desc = 'Click on a item to remove it from the list. You can drop an item on the empty slot to add it to the list.',
+                        type = 'multiselect',
+                        dialogControl = 'ItemList',
+                        order = 40,
+                        get = function() return true end,
+                        set = 'SetItem',
+                        values = function() return addon.db.profile.filtered end,
+                        width = 'full',
                     },
                 },
             },
         },
     }
-    return options
+    local optionMeta = { __index = optionProto }
+
+    return setmetatable({handler = setmetatable({values = {}}, handlerMeta)}, optionMeta)
 end
 
-function kLootFilter:OnEnable() end
+function addon:OnEnable()
+    -- If option to enable is set, register events.
+    if self.db.profile.enabled then
+        -- Cannot process with autoloot enabled.
+        if GetCVarBool("autoLootDefault") then
+            local name = self:Color_String(ADDON_NAME, 1, 0.5, 0.25, 1)
+            local interface = self:Color_String("Interface > Controls > Auto Loot", 0.1, 0.75, 0.35, 1)
+            print(("%s -- Cannot filter loot when Auto Loot is enabled.  To use %s, please disable Auto Loot in %s, then re-enable %s by typing /klootfilter and checking Enabled."):format(name, name, interface, name))
+            self.db.profile.enabled = false
+            self:Disable()
+        else
+            self:RegisterEvent('LOOT_READY', 'ProcessLoot')
+        end
+    else
+        self:Disable()
+    end
+end
 
-function kLootFilter:OnDisable() end
+function addon:OnDisable()
+    self:UnregisterEvent('LOOT_READY')
+end
 
-function kLootFilter:OnInitialize()
+function addon:OnInitialize()
     -- Load Database
     self.db = LibStub("AceDB-3.0"):New(("%sDB"):format(ADDON_NAME), self.defaults, true)
+
     -- Options
 	LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable(ADDON_NAME, GetOptions)
 	LibStub("AceConfigDialog-3.0"):AddToBlizOptions(ADDON_NAME, GetAddOnMetadata(ADDON_NAME, "Title"))
---    self.options = self.options or {}
---    self.options.args = self.options.args or {}
---    self.options.args.profile = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
-    -- TODO: Add configurable options.
-    --self.config = LibStub("AceConfig-3.0"):RegisterOptionsTable("kLootFilter", self.options, { "klootfilter", "klf" })
-    -- Init Events
-    self:InitializeEvents()
+
+    -- Register slash commands.
+    self:RegisterChatCommand("klf", 'OpenOptions')
+    self:RegisterChatCommand("klootfilter", 'OpenOptions')
 end
 
 --- Adds the passed item to the filter, if necessary.
-function kLootFilter:AddItemToFilter(item)
+function addon:AddItemToFilter(item)
     local id = self:Item_Id(item)
     -- If no id returned, invalid item error.
     if not id then
@@ -132,7 +212,7 @@ function kLootFilter:AddItemToFilter(item)
 end
 
 --- Get the current filtered item list for options display.
-function kLootFilter:GetFilteredList()
+function addon:GetFilteredList()
     local list = {}
     for id, data in pairs(self.db.profile.filtered) do
         local name = self:Item_Name(id)
@@ -146,30 +226,26 @@ function kLootFilter:GetFilteredList()
 end
 
 --- Determined if the passed item is already in the list.
-function kLootFilter:IsItemFiltered(item)
+function addon:IsItemFiltered(item)
     local id = self:Item_Id(item)
     if not id then return end
-    if #self.db.profile.filtered == 0 then return false end
     -- Check in blacklist.
     return self.db.profile.filtered[id] and true or false
 end
 
+--- Open options dialog window.
+function addon:OpenOptions()
+    AceConfigDialog:Open(ADDON_NAME)
+end
+
 --- Processes all loot filtering.
-function kLootFilter:ProcessLoot()
+function addon:ProcessLoot()
     -- slows method calls to once a LOOT_DELAY interval since LOOT_READY event fires twice
     if (GetTime() - epoch >= LOOT_DELAY) then
         epoch = GetTime()
         if not GetCVarBool("autoLootDefault") then -- Autoloot disabled
             for slot = 1, GetNumLootItems() do
-                local itemLink = GetLootSlotLink(slot)
-                if itemLink then
-                    local id = tonumber(self:Item_Id(itemLink))
-                    if FILTER_BLACKLIST[id] then
-                        print(("%s: %s [%s] %s"):format(ADDON_NAME, itemLink, id, self:Color_String("Blacklisted (Ignored)", 1, 0, 0, 1)))
-                    else
-                        LootSlot(slot)
-                    end
-                end
+                self:ProcessSlot(slot)
             end
             -- Close loot window.
             CloseLoot()
@@ -179,7 +255,38 @@ function kLootFilter:ProcessLoot()
     end
 end
 
---- Registers all global events to appropriate functions.
-function kLootFilter:InitializeEvents()
-    self:RegisterEvent('LOOT_READY', 'ProcessLoot')
+--- Determine if item slot should be looted.
+function addon:ProcessSlot(slot)
+    local item = GetLootSlotLink(slot)
+    if item then
+        local id = tonumber(self:Item_Id(item))
+        local filtered = self:IsItemFiltered(item)
+        local blacklist, whitelist = not self.db.profile.isWhitelist, self.db.profile.isWhitelist
+        -- Determine if blacklist or whitelist
+        -- if blacklist and item filtered, ignore it.
+        -- if whitelist and item not filtered, ignore it.
+        -- if whitelist and item filtered, loot it.
+        -- if blacklist and item not filtered, loot it.
+        if (blacklist and filtered) or (whitelist and not filtered) then
+            -- Output filtering message, if set.
+            if self.db.profile.outputFiltering then
+                print(("%s: %s [%s] %s"):format(ADDON_NAME, item, id, self:Color_String("ignored.", 1, 0, 0, 1)))
+            end
+        elseif (blacklist and not filtered) or (whitelist and filtered) then
+             LootSlot(slot)
+        end
+    end
+end
+
+--- Removes passed item from filter.
+function addon:RemoveItemFromFilter(item)
+    local id = self:Item_Id(item)
+    -- If no id returned, invalid item.
+    if not id then
+        return
+    end
+    if self.db.profile.filtered[id] then
+        self.db.profile.filtered[id] = nil
+        return true
+    end
 end
