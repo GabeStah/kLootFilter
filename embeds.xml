@@ -2,8 +2,7 @@
 ..\FrameXML\UI.xsd">
 	<Script file="libs\LibStub\LibStub.lua"/>
 	<Include file="libs\CallbackHandler-1.0\CallbackHandler-1.0.xml"/>
-	<Include file="libs\LibSharedMedia-3.0\LibSharedMedia-3.0.lua"/>
-	<Include file="libs\Ace3\AceAddon-3.0\AceAddon-3.0.xml"/>	
+	<Include file="libs\Ace3\AceAddon-3.0\AceAddon-3.0.xml"/>
 	<Include file="libs\Ace3\AceComm-3.0\AceComm-3.0.xml"/>
 	<Include file="libs\Ace3\AceConsole-3.0\AceConsole-3.0.xml"/>
 	<Include file="libs\Ace3\AceConfig-3.0\AceConfig-3.0.xml"/>
@@ -11,8 +10,6 @@
 	<Include file="libs\Ace3\AceDBOptions-3.0\AceDBOptions-3.0.xml"/>
 	<Include file="libs\Ace3\AceEvent-3.0\AceEvent-3.0.xml"/>
 	<Include file="libs\Ace3\AceHook-3.0\AceHook-3.0.xml"/>
-	<Include file="libs\Ace3\AceSerializer-3.0\AceSerializer-3.0.xml"/>
-	<Include file="libs\Ace3\AceTimer-3.0\AceTimer-3.0.xml"/>
 	<Include file="libs\kLib\kLib-1.0.xml"/>
 	<Include file="libs\kLib\kLibColor-1.0\kLibColor-1.0.xml"/>
 	<Include file="libs\kLib\kLibComm-1.0\kLibComm-1.0.xml"/>
