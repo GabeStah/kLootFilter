@@ -2,7 +2,7 @@
 ## Title: kLootFilter
 ## Author: Kulldam
 ## Notes: Filter out specific items when looting.
-## Version: 1.0.44
+## Version: 1.1.44
 ## SavedVariables: kLootFilterDB
 
 embeds.xml

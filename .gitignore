@@ -41,8 +41,6 @@ luac.out
 *.x86_64
 *.hex
 
-
-.gitignore
 .idea/
 
 # Libs
